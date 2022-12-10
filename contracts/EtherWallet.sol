@@ -18,7 +18,9 @@ contract EtherWallet {
     function withdraw() external payable {
         require(msg.sender == owner, "Only owner can withdraw funds");
         require(msg.value <= address(this).balance, "Insufficient funds");
+        require(msg.value >= 0, "Value must be greater than 0");
         require(address(this).balance > 0, "The contract is empty");
+
         (bool sent, ) = owner.call{value: msg.value}("");
         require(sent, "Failed to send Ether");
         emit EtherWithdrawn(msg.value);
