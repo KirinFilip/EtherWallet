@@ -15,15 +15,14 @@ contract EtherWallet {
         emit EtherReceived(msg.sender, msg.value);
     }
 
-    function withdraw() external payable {
+    function withdraw(uint256 amount) external payable {
         require(msg.sender == owner, "Only owner can withdraw funds");
-        require(msg.value <= address(this).balance, "Insufficient funds");
-        require(msg.value >= 0, "Value must be greater than 0");
+        require(amount <= address(this).balance, "Insufficient funds");
         require(address(this).balance > 0, "The contract is empty");
 
-        (bool sent, ) = owner.call{value: msg.value}("");
+        (bool sent, ) = owner.call{value: amount}("");
         require(sent, "Failed to send Ether");
-        emit EtherWithdrawn(msg.value);
+        emit EtherWithdrawn(amount);
     }
 
     function getBalance() external view returns (uint256) {
