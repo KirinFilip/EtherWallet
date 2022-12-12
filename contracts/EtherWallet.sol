@@ -1,26 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-contract EtherWallet {
-    address public owner;
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
+contract EtherWallet is Ownable, Pausable {
     event EtherWithdrawn(uint256 amount);
     event EtherReceived(address indexed sender, uint256 amount);
 
-    constructor() {
-        owner = payable(msg.sender);
-    }
+    constructor() {}
 
     receive() external payable {
         emit EtherReceived(msg.sender, msg.value);
     }
 
-    function withdraw(uint256 amount) external payable {
-        require(msg.sender == owner, "Only owner can withdraw funds");
+    function withdraw(uint256 amount) external payable onlyOwner {
         require(amount <= address(this).balance, "Insufficient funds");
         require(address(this).balance > 0, "The contract is empty");
 
-        (bool sent, ) = owner.call{value: amount}("");
+        (bool sent, ) = msg.sender.call{value: amount}("");
         require(sent, "Failed to send Ether");
         emit EtherWithdrawn(amount);
     }
