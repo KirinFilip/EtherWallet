@@ -2,9 +2,8 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract EtherWallet is Ownable, Pausable {
+contract EtherWallet is Ownable {
     event EtherWithdrawn(uint256 amount);
     event EtherReceived(address indexed sender, uint256 amount);
 
@@ -21,6 +20,17 @@ contract EtherWallet is Ownable, Pausable {
         (bool sent, ) = msg.sender.call{value: amount}("");
         require(sent, "Failed to send Ether");
         emit EtherWithdrawn(amount);
+    }
+
+    function withdrawAll(address payable _to) external payable onlyOwner {
+        require(msg.value <= address(this).balance, "Insufficient funds");
+        require(address(this).balance > 0, "The contract is empty");
+
+        (bool sent, ) = _to.call{value: address(this).balance}("");
+        require(sent, "Failed to send Ether");
+        emit EtherWithdrawn(msg.value);
+
+        emit EtherWithdrawn(address(this).balance);
     }
 
     function getBalance() external view returns (uint256) {
